@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asados Los Llanos - Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        /* Primary (Brand) Color - Constant */
+        --color-primary-hue: 45; /* Hue for yellow */
+        --color-primary: hsl(var(--color-primary-hue), 95%, 51%); /* hsl(45, 95%, 51%) ~ #facc15 */
+        --color-primary-text-on-brand: #1a1a1a; /* Text on top of yellow buttons */
+        --color-primary-hover: hsl(var(--color-primary-hue), 95%, 60%);
+
+        /* Default to Dark Theme */
+        --color-bg-primary: #1a1a1a;
+        --color-bg-secondary: #2d2d2d;
+        --color-bg-tertiary: #3a3a3a;
+        --color-text-primary: #ffffff;
+        --color-text-secondary: #a0aec0; /* gray-400 */
+        --color-border: #4a5568; /* gray-600 */
+      }
+
+      .light-theme {
+        --color-bg-primary: #f7fafc; /* gray-100 */
+        --color-bg-secondary: #ffffff;
+        --color-bg-tertiary: #edf2f7; /* gray-200 */
+        --color-text-primary: #1a202c; /* gray-800 */
+        --color-text-secondary: #4a5568; /* gray-600 */
+        --color-border: #e2e8f0; /* gray-300 */
+      }
+      
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+      
+      /* Custom Animations */
+      @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+      }
+      @keyframes scaleIn {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes slideInFromLeft {
+          from { transform: translateX(-20px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideInFromRight {
+          from { transform: translateX(20px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+      }
+      .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+      .animate-scaleIn { animation: scaleIn 0.3s ease-out forwards; }
+      .animate-slideInFromLeft { animation: slideInFromLeft 0.4s ease-out forwards; }
+      .animate-slideInFromRight { animation: slideInFromRight 0.4s ease-out forwards; }
+
+      /* Print Styles */
+      @media print {
+          body * {
+              visibility: hidden;
+          }
+          #report-content, #report-content * {
+              visibility: visible;
+          }
+          #report-content {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              background-color: white !important;
+              color: black !important;
+          }
+          #report-content h1, #report-content h2, #report-content h3, #report-content h4, #report-content th, #report-content p, #report-content td, #report-content span, #report-content div {
+              color: #1f2937 !important;
+              background-color: transparent !important;
+          }
+          #report-content .text-\[\--color-primary\] {
+                color: #D97706 !important;
+          }
+          #report-content .border-\[\--color-primary\] {
+                border-color: #D97706 !important;
+          }
+          #report-content .text-green-400 {
+              color: green !important;
+          }
+          #report-content .text-red-400 {
+              color: red !important;
+          }
+          .page-break {
+              page-break-after: always;
+          }
+          .print-hidden { display: none; }
+          .print-block { display: block; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "firebase/": "https://esm.sh/firebase@^12.0.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.12.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.536.0",
+    "recharts": "https://esm.sh/recharts@^3.1.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

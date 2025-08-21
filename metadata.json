@@ -1,0 +1,6 @@
+{
+  "name": "Copy of Asados Los Llanos - Inventory Manager",
+  "description": "An intelligent inventory management system for 'Asados Los Llanos' restaurant, featuring stock tracking, requisitions, invoice management, a new productions module to track processed goods, and an AI assistant powered by Gemini for recommendations and actions.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

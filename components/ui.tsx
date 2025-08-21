@@ -19,7 +19,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, name, currentView, setVi
     <button
         onClick={() => { setView(name); setIsOpen(false); }}
         className={`flex items-center w-full text-left px-4 py-3 rounded-lg transition-all duration-300 transform hover:translate-x-2 text-text-primary hover:bg-bg-tertiary ${
-            currentView === name ? 'bg-[var(--color-primary)] text-[var(--color-primary-text-on-brand)]' : ''
+            currentView === name ? 'nav-item-active' : ''
         }`}
     >
         {icon}
@@ -155,7 +155,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({ show, onClose, onCon
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn print-hidden">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-sm animate-scaleIn shadow-lg">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-sm animate-scaleIn">
                 <h3 className="text-xl font-bold text-[var(--color-primary)] mb-4">{title}</h3>
                 <div className="text-text-secondary mb-6">{children}</div>
                 <div className="flex justify-end gap-4">
@@ -179,7 +179,7 @@ export const AllProductsModal: React.FC<AllProductsModalProps> = ({ show, onClos
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn print-hidden">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-lg animate-scaleIn shadow-lg">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-lg animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] flex items-center gap-2">
                         <ShoppingCart /> Todos los Productos
@@ -240,7 +240,7 @@ export const StockStatusModal: React.FC<StockStatusModalProps> = ({ show, onClos
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn print-hidden">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-lg animate-scaleIn">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-lg animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] flex items-center gap-2">
                         {titleIcon} {title}
@@ -294,7 +294,7 @@ export const LowAndOutOfStockModal: React.FC<LowAndOutOfStockModalProps> = ({ sh
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn print-hidden">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-lg animate-scaleIn">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-lg animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] flex items-center gap-2">
                         <Bell className="text-yellow-500" /> {title}
@@ -369,7 +369,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({ show, 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn print-hidden">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-md animate-scaleIn">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-md animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] flex items-center gap-2">
                         <Info size={22} /> {title}
@@ -444,7 +444,7 @@ export const ProductOutputModal: React.FC<ProductOutputModalProps> = ({ product,
     
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-md animate-scaleIn">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-md animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)]">Registrar Salida de Producto</h3>
                     <button onClick={onClose} className="text-text-secondary hover:text-text-primary"><X size={24} /></button>
@@ -541,7 +541,7 @@ export const ActionConfirmationCard: React.FC<ActionConfirmationCardProps> = ({ 
     };
 
     return (
-        <div className="max-w-lg p-4 rounded-lg bg-bg-secondary border border-[var(--color-primary)] shadow-lg">
+        <div className="glass-panel max-w-lg p-4 rounded-lg border border-[var(--color-primary)]">
             <div className="flex items-start gap-3">
                 <AlertTriangle className="text-[var(--color-primary)] mt-1 flex-shrink-0" size={24}/>
                 <div>

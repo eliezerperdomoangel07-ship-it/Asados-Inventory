@@ -21,6 +21,9 @@
         --color-text-primary: #ffffff;
         --color-text-secondary: #a0aec0; /* gray-400 */
         --color-border: #4a5568; /* gray-600 */
+        --color-bg-glass: rgba(30, 30, 30, 0.5);
+        --color-border-glass: rgba(74, 85, 104, 0.4);
+        --color-shadow-glass: rgba(0, 0, 0, 0.37);
       }
 
       .light-theme {
@@ -30,6 +33,9 @@
         --color-text-primary: #1a202c; /* gray-800 */
         --color-text-secondary: #4a5568; /* gray-600 */
         --color-border: #e2e8f0; /* gray-300 */
+        --color-bg-glass: rgba(255, 255, 255, 0.6);
+        --color-border-glass: rgba(226, 232, 240, 0.6);
+        --color-shadow-glass: rgba(99, 99, 99, 0.2);
       }
       
       body {
@@ -37,6 +43,57 @@
         background-color: var(--color-bg-primary);
         color: var(--color-text-primary);
         transition: background-color 0.3s, color 0.3s;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* Aurora Background Animation */
+      body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image:
+              radial-gradient(at 20% 25%, hsla(var(--color-primary-hue), 95%, 51%, 0.15) 0px, transparent 50%),
+              radial-gradient(at 80% 20%, hsla(210, 80%, 60%, 0.15) 0px, transparent 50%),
+              radial-gradient(at 30% 90%, hsla(280, 70%, 60%, 0.15) 0px, transparent 50%),
+              radial-gradient(at 75% 85%, hsla(30, 80%, 60%, 0.15) 0px, transparent 50%);
+          z-index: -1;
+          animation: aurora 25s linear infinite;
+          will-change: transform;
+      }
+
+      @keyframes aurora {
+          0% { transform: rotate(0deg) scale(1.2); }
+          50% { transform: rotate(180deg) scale(1.5); }
+          100% { transform: rotate(360deg) scale(1.2); }
+      }
+      
+      /* Glassmorphism style for panels */
+      .glass-panel {
+          background-color: var(--color-bg-glass);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid var(--color-border-glass);
+          box-shadow: 0 8px 32px 0 var(--color-shadow-glass);
+      }
+
+      /* 3D Card Hover Effect */
+      .card-3d {
+          transform-style: preserve-3d;
+          transition: transform 0.4s ease-out;
+      }
+      .card-3d:hover {
+          transform: perspective(1000px) rotateX(5deg) scale3d(1.05, 1.05, 1.05);
+      }
+
+      /* Active Nav Item Glow */
+      .nav-item-active {
+          background: var(--color-primary);
+          color: var(--color-primary-text-on-brand);
+          box-shadow: 0 0 15px 3px hsla(var(--color-primary-hue), 95%, 51%, 0.5);
       }
 
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');

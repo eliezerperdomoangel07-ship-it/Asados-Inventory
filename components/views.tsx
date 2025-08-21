@@ -51,7 +51,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onAddProduct, onDone, c
     };
     
     return (
-        <div className="bg-bg-primary p-4 rounded-lg my-4 border border-[var(--color-border)] animate-fadeIn">
+        <div className="glass-panel p-4 rounded-lg my-4 animate-fadeIn">
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                 <div className="md:col-span-2 lg:col-span-1">
                     <label className="block text-sm font-medium text-text-secondary mb-1">Nombre del Producto</label>
@@ -102,7 +102,17 @@ interface ProductItemProps {
 }
 const ProductItem: React.FC<ProductItemProps> = ({ product, onUpdateQuantity, onDeleteProduct, onShowOutputModal, permissions }) => {
     const { canDeleteProducts, canManuallyAdjustStock } = permissions;
-    const isLowStock = product.quantity <= product.minStock;
+    
+    const stockPercentage = Math.min((product.quantity / (product.minStock * 2)) * 100, 100);
+    const isCritical = product.quantity > 0 && product.quantity <= product.minStock / 2;
+    const isLowStock = product.quantity > 0 && product.quantity <= product.minStock;
+    const isOutOfStock = product.quantity === 0;
+
+    let progressBarColor = 'bg-green-500';
+    if (isLowStock) progressBarColor = 'bg-yellow-500';
+    if (isCritical) progressBarColor = 'bg-orange-500';
+    if (isOutOfStock) progressBarColor = 'bg-red-500';
+    
     const intervalRef = useRef<number | null>(null);
     const timeoutRef = useRef<number | null>(null);
 
@@ -129,16 +139,25 @@ const ProductItem: React.FC<ProductItemProps> = ({ product, onUpdateQuantity, on
     }, []);
 
     return (
-        <tr className="border-b border-[var(--color-border)] hover:bg-bg-tertiary">
+        <tr className="border-b border-[var(--color-border)] hover:bg-bg-tertiary transition-transform duration-200 hover:scale-[1.02]">
             <td className="p-3 font-medium">
                 <div className="flex items-center">
                     {product.name}
-                    {isLowStock && <AlertTriangle className="ml-2 text-red-500" size={16} />}
+                    {isLowStock && <AlertTriangle className="ml-2 text-yellow-500" size={16} />}
+                     {isOutOfStock && <AlertTriangle className="ml-2 text-red-500" size={16} />}
                 </div>
                 <p className="text-xs text-text-secondary">Mínimo: {product.minStock} {product.unit}</p>
             </td>
-            <td className={`p-3 text-center font-mono text-lg ${isLowStock ? 'text-red-500' : 'text-text-primary'}`}>
-                {product.quantity} <span className="text-sm text-text-secondary">{product.unit}</span>
+            <td className="p-3 align-middle" style={{minWidth: '150px'}}>
+                <div className="flex items-center justify-start gap-2">
+                    <span className={`font-mono text-lg font-bold ${isLowStock ? 'text-yellow-400' : 'text-text-primary'} ${isOutOfStock ? 'text-red-500' : ''}`}>
+                        {product.quantity}
+                    </span>
+                    <span className="text-sm text-text-secondary">{product.unit}</span>
+                </div>
+                <div className="w-full bg-bg-primary rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div className={`${progressBarColor} h-1.5 rounded-full transition-all duration-500`} style={{ width: `${stockPercentage}%` }}></div>
+                </div>
             </td>
             <td className="p-3">
                 <div className="flex justify-center items-center gap-2">
@@ -190,7 +209,7 @@ const RecentMovements: React.FC<RecentMovementsProps> = ({ products, category, o
     }, [products, category]);
 
     return (
-        <div className="bg-bg-secondary p-6 rounded-lg mt-8">
+        <div className="glass-panel p-6 rounded-2xl mt-8">
             <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Movimientos Recientes en {category}</h3>
             <ul className="space-y-3 max-h-[400px] overflow-y-auto">
                 {recentMovements.length > 0 ? recentMovements.map((m, i) => (
@@ -331,38 +350,41 @@ export const DashboardView: React.FC<CommonViewProps & { setView: (view: ViewTyp
             <AllProductsModal show={showAllProductsModal} onClose={() => setShowAllProductsModal(false)} products={products} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                 <button onClick={() => setShowAllProductsModal(true)} className="bg-bg-secondary p-4 rounded-lg flex items-center justify-between text-left hover:bg-bg-tertiary transition-all duration-300 hover:shadow-xl hover:-translate-y-1 w-full">
+                 <div onClick={() => setShowAllProductsModal(true)} className="glass-panel p-6 rounded-2xl flex items-center justify-between text-left cursor-pointer relative overflow-hidden card-3d">
                     <div>
                         <p className="text-text-secondary text-sm">Productos Totales</p>
-                        <p className="text-2xl font-bold">{products.length}</p>
+                        <p className="text-3xl font-bold">{products.length}</p>
                     </div>
-                    <ShoppingCart className="text-[var(--color-primary)]" size={28} />
-                </button>
-                <button onClick={() => setShowLowStockModal(true)} className="bg-bg-secondary p-4 rounded-lg flex items-center justify-between text-left hover:bg-bg-tertiary transition-all duration-300 hover:shadow-xl hover:-translate-y-1 w-full">
+                    <ShoppingCart className="text-[var(--color-primary)]" size={32} />
+                    <ShoppingCart className="absolute -right-4 -bottom-4 text-[var(--color-primary)] opacity-10" size={100} />
+                </div>
+                <div onClick={() => setShowLowStockModal(true)} className="glass-panel p-6 rounded-2xl flex items-center justify-between text-left cursor-pointer relative overflow-hidden card-3d" style={lowStockCount > 0 ? {'--tw-shadow-color': 'hsl(0, 80%, 60%)', boxShadow: '0 0 20px -5px var(--tw-shadow-color)'} as React.CSSProperties : {}}>
                     <div>
                         <p className="text-text-secondary text-sm">Alertas de Stock General</p>
-                        <p className={`text-2xl font-bold ${lowStockCount > 0 ? 'text-red-500' : 'text-green-500'}`}>{lowStockCount}</p>
+                        <p className={`text-3xl font-bold ${lowStockCount > 0 ? 'text-red-500' : 'text-green-500'}`}>{lowStockCount}</p>
                     </div>
-                    <Bell className={lowStockCount > 0 ? 'text-red-500' : 'text-green-500'} size={28} />
-                </button>
-                <button onClick={() => setView('requisitions')} className="bg-bg-secondary p-4 rounded-lg flex items-center justify-between text-left hover:bg-bg-tertiary transition-all duration-300 hover:shadow-xl hover:-translate-y-1 w-full">
+                    <Bell className={lowStockCount > 0 ? 'text-red-500' : 'text-green-500'} size={32} />
+                    <Bell className="absolute -right-4 -bottom-4 text-red-500 opacity-10" size={100} />
+                </div>
+                <div onClick={() => setView('requisitions')} className="glass-panel p-6 rounded-2xl flex items-center justify-between text-left cursor-pointer relative overflow-hidden card-3d">
                     <div>
                         <p className="text-text-secondary text-sm">Requisiciones Pendientes</p>
-                        <p className={`text-2xl font-bold ${pendingRequisitionsCount > 0 ? 'text-[var(--color-primary)]' : 'text-green-500'}`}>{pendingRequisitionsCount}</p>
+                        <p className={`text-3xl font-bold ${pendingRequisitionsCount > 0 ? 'text-[var(--color-primary)]' : 'text-green-500'}`}>{pendingRequisitionsCount}</p>
                     </div>
-                    <ClipboardList className={pendingRequisitionsCount > 0 ? 'text-[var(--color-primary)]' : 'text-green-500'} size={28} />
-                </button>
+                    <ClipboardList className={pendingRequisitionsCount > 0 ? 'text-[var(--color-primary)]' : 'text-green-500'} size={32} />
+                     <ClipboardList className="absolute -right-4 -bottom-4 text-[var(--color-primary)] opacity-10" size={100} />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-bg-secondary p-6 rounded-lg">
+                <div className="glass-panel p-6 rounded-2xl">
                     <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Ajuste Rápido de Stock</h3>
                     <div className="space-y-4">
                         <div className="relative">
                             <label className="block text-sm font-medium text-text-secondary mb-1">Buscar Producto</label>
                             <input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="Escribe para buscar..." className="bg-bg-primary w-full pr-4 pl-4 py-2 rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" disabled={showDestinationSelector} />
                             {searchResults.length > 0 && (
-                                <ul className="absolute z-10 w-full bg-bg-primary border border-[var(--color-border)] rounded-lg mt-1 max-h-60 overflow-y-auto">
+                                <ul className="absolute z-10 w-full bg-bg-tertiary border border-[var(--color-border)] rounded-lg mt-1 max-h-60 overflow-y-auto">
                                     {searchResults.map(p => (
                                         <li key={p.id} onClick={() => handleSelectProduct(p)} className="px-4 py-2 hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-text-on-brand)] cursor-pointer">{p.name}</li>
                                     ))}
@@ -405,7 +427,7 @@ export const DashboardView: React.FC<CommonViewProps & { setView: (view: ViewTyp
                     </div>
                 </div>
 
-                <div className="bg-bg-secondary p-6 rounded-lg">
+                <div className="glass-panel p-6 rounded-2xl">
                     <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Movimientos Recientes</h3>
                     <ul className="space-y-3 max-h-[300px] overflow-y-auto">
                         {recentMovements.length > 0 ? recentMovements.map((m, i) => (
@@ -469,14 +491,14 @@ export const CategoryView: React.FC<CommonViewProps & {
             <LowAndOutOfStockModal show={showLowStockModal} onClose={() => setShowLowStockModal(false)} products={filteredProducts} category={category} />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-bg-secondary p-4 rounded-lg flex items-center justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="glass-panel p-4 rounded-2xl flex items-center justify-between">
                     <div>
                         <p className="text-text-secondary text-sm">Productos en {category}</p>
                         <p className="text-2xl font-bold">{filteredProducts.length}</p>
                     </div>
                     <ShoppingCart className="text-[var(--color-primary)]" size={28} />
                 </div>
-                <button onClick={() => setShowLowStockModal(true)} className="bg-bg-secondary p-4 rounded-lg flex items-center justify-between text-left hover:bg-bg-tertiary transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <button onClick={() => setShowLowStockModal(true)} className="glass-panel p-4 rounded-2xl flex items-center justify-between text-left">
                     <div>
                         <p className="text-text-secondary text-sm">Alertas de Stock</p>
                         <p className={`text-2xl font-bold ${lowStockCount > 0 ? 'text-red-500' : 'text-green-500'}`}>{lowStockCount}</p>
@@ -485,7 +507,7 @@ export const CategoryView: React.FC<CommonViewProps & {
                 </button>
             </div>
 
-            <div className="bg-bg-secondary p-4 rounded-lg">
+            <div className="glass-panel p-4 rounded-2xl">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                     <div className="relative w-full md:w-1/3">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" size={20} />
@@ -510,7 +532,7 @@ export const CategoryView: React.FC<CommonViewProps & {
                         <thead>
                             <tr className="border-b border-[var(--color-border)]">
                                 <th className="p-3">Producto</th>
-                                <th className="p-3 text-center">Stock Actual</th>
+                                <th className="p-3 text-left">Stock Actual</th>
                                 <th className="p-3 text-center">Ajuste Rápido</th>
                                 <th className="p-3 text-center">Acciones</th>
                             </tr>
@@ -590,74 +612,77 @@ const RequisitionCard: React.FC<RequisitionCardProps> = ({ requisition, onProces
     };
 
     return (
-        <div className="bg-bg-secondary p-4 rounded-lg border-l-4 border-[var(--color-primary)] animate-fadeIn">
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-3">
-                    {getDepartmentIcon(requisition.department)}
-                    <h3 className="text-xl font-bold">{requisition.department}</h3>
+        <div className="glass-panel p-4 rounded-2xl relative animate-fadeIn">
+            <div className="absolute left-0 top-0 h-full w-1.5 bg-[var(--color-primary)] rounded-l-2xl"></div>
+            <div className="pl-4">
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-3">
+                        {getDepartmentIcon(requisition.department)}
+                        <h3 className="text-xl font-bold">{requisition.department}</h3>
+                    </div>
+                    <span className="text-sm text-text-secondary">
+                        {requisition.createdAt?.toDate().toLocaleDateString('es-VE')}
+                    </span>
                 </div>
-                <span className="text-sm text-text-secondary">
-                    {requisition.createdAt?.toDate().toLocaleDateString('es-VE')}
-                </span>
-            </div>
 
-            <div className="space-y-3">
-                {requisition.items.map(item => {
-                    const isCompleted = requisition.status === 'completed';
-                    const notFullyDelivered = isCompleted && item.deliveredQuantity! < item.requestedQuantity;
-                    
-                    return (
-                        <div key={item.productId} className={`grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-bg-primary rounded-md items-center ${notFullyDelivered ? 'border border-red-500' : ''}`}>
-                            <div>
-                                <p className="font-semibold">{item.productName}</p>
-                                <p className="text-sm text-text-secondary">Solicitado: {item.requestedQuantity} {item.unit}</p>
+                <div className="space-y-3">
+                    {requisition.items.map(item => {
+                        const isCompleted = requisition.status === 'completed';
+                        const notFullyDelivered = isCompleted && item.deliveredQuantity! < item.requestedQuantity;
+                        
+                        return (
+                            <div key={item.productId} className={`grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-bg-primary rounded-md items-center ${notFullyDelivered ? 'border border-red-500' : ''}`}>
+                                <div>
+                                    <p className="font-semibold">{item.productName}</p>
+                                    <p className="text-sm text-text-secondary">Solicitado: {item.requestedQuantity} {item.unit}</p>
+                                </div>
+                                {isCompleted ? (
+                                    <>
+                                        <div>
+                                            <p className={`text-sm ${notFullyDelivered ? 'text-red-400' : 'text-text-primary'}`}>
+                                                Entregado: <span className="font-bold">{item.deliveredQuantity} {item.unit}</span>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-text-secondary italic">{item.observation || 'Sin observaciones'}</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <input
+                                            type="number"
+                                            placeholder="Cant. Entregada"
+                                            value={processedItems[item.productId]?.deliveredQuantity ?? ''}
+                                            onChange={(e) => handleItemChange(item.productId, 'deliveredQuantity', e.target.value)}
+                                            className="bg-bg-secondary p-2 rounded-md border border-[var(--color-border)]"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Observación (opcional)"
+                                            value={processedItems[item.productId]?.observation ?? ''}
+                                            onChange={(e) => handleItemChange(item.productId, 'observation', e.target.value)}
+                                            className="bg-bg-secondary p-2 rounded-md border border-[var(--color-border)]"
+                                        />
+                                    </>
+                                )}
                             </div>
-                            {isCompleted ? (
-                                 <>
-                                    <div>
-                                        <p className={`text-sm ${notFullyDelivered ? 'text-red-400' : 'text-text-primary'}`}>
-                                            Entregado: <span className="font-bold">{item.deliveredQuantity} {item.unit}</span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-text-secondary italic">{item.observation || 'Sin observaciones'}</p>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <input
-                                        type="number"
-                                        placeholder="Cant. Entregada"
-                                        value={processedItems[item.productId]?.deliveredQuantity ?? ''}
-                                        onChange={(e) => handleItemChange(item.productId, 'deliveredQuantity', e.target.value)}
-                                        className="bg-bg-secondary p-2 rounded-md border border-[var(--color-border)]"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Observación (opcional)"
-                                        value={processedItems[item.productId]?.observation ?? ''}
-                                        onChange={(e) => handleItemChange(item.productId, 'observation', e.target.value)}
-                                        className="bg-bg-secondary p-2 rounded-md border border-[var(--color-border)]"
-                                    />
-                                </>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {requisition.status === 'pending' && (
-                <div className="mt-4 flex justify-end">
-                    <button 
-                        onClick={handleSubmit} 
-                        disabled={!canProcess}
-                        className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-transform active:scale-95 disabled:bg-gray-500 disabled:cursor-not-allowed"
-                        title={canProcess ? "Procesar requisición" : "Permiso para procesar denegado"}
-                    >
-                        {canProcess ? 'Procesar Requisición' : <Lock size={18}/>}
-                    </button>
+                        );
+                    })}
                 </div>
-            )}
+
+                {requisition.status === 'pending' && (
+                    <div className="mt-4 flex justify-end">
+                        <button 
+                            onClick={handleSubmit} 
+                            disabled={!canProcess}
+                            className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-transform active:scale-95 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                            title={canProcess ? "Procesar requisición" : "Permiso para procesar denegado"}
+                        >
+                            {canProcess ? 'Procesar Requisición' : <Lock size={18}/>}
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -720,7 +745,7 @@ const CreateRequisitionModal: React.FC<CreateRequisitionModalProps> = ({ onClose
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-2xl animate-scaleIn">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-2xl animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)]">Crear Requisición Manual</h3>
                     <button onClick={onClose} className="text-text-secondary hover:text-text-primary"><X size={24} /></button>
@@ -835,7 +860,7 @@ export const RequisitionsView: React.FC<{
                         canProcess={permissions.canProcessRequisitions}
                     />
                 )) : (
-                    <div className="text-center py-16 bg-bg-secondary rounded-lg">
+                    <div className="text-center py-16 glass-panel rounded-2xl">
                         <p className="text-text-secondary">No hay requisiciones en estado "{filter}".</p>
                     </div>
                 )}
@@ -861,7 +886,7 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({ show, onClose, 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-2xl animate-scaleIn max-h-[90vh] overflow-y-auto">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-2xl animate-scaleIn max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4 border-b border-[var(--color-border)] pb-4">
                     <div>
                         <h3 className="text-2xl font-bold text-[var(--color-primary)]">Detalle de Factura</h3>
@@ -997,7 +1022,7 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ onClose, onCrea
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-4xl animate-scaleIn max-h-[90vh] overflow-y-auto">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-4xl animate-scaleIn max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)]">Crear Nueva Factura</h3>
                     <button onClick={onClose} className="text-text-secondary hover:text-text-primary"><X size={24} /></button>
@@ -1073,7 +1098,7 @@ export const InvoicesView: React.FC<{
             {showCreateModal && <CreateInvoiceModal onClose={() => setShowCreateModal(false)} onCreate={handleCreateInvoice} showNotification={showNotification} />}
             {selectedInvoice && <InvoiceDetailModal show={!!selectedInvoice} onClose={() => setSelectedInvoice(null)} invoice={selectedInvoice} onUpdateStatus={handleUpdateInvoiceStatus} />}
 
-            <div className="bg-bg-secondary p-4 rounded-lg">
+            <div className="glass-panel p-4 rounded-2xl">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -1215,7 +1240,7 @@ export const OrdersView: React.FC<{
         <div>
             <Header title="Pedidos a Proveedores" subtitle="Genera y envía tus órdenes de compra." />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-bg-secondary p-6 rounded-lg">
+                <div className="lg:col-span-2 glass-panel p-6 rounded-2xl">
                     <div className="mb-4">
                         <h3 className="text-lg font-semibold text-[var(--color-primary)] mb-2">Crear Pedido Personalizado</h3>
                         <div className="p-4 bg-bg-primary rounded-lg">
@@ -1279,7 +1304,7 @@ export const OrdersView: React.FC<{
                         )}
                     </div>
                 </div>
-                <div className="bg-bg-secondary p-6 rounded-lg self-start">
+                <div className="glass-panel p-6 rounded-2xl self-start">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] mb-4">Enviar Pedido</h3>
                     <div className="space-y-4">
                         <input type="text" placeholder="Nombre del Proveedor" value={providerName} onChange={e => setProviderName(e.target.value)} className="w-full bg-bg-primary p-2 rounded-md border border-[var(--color-border)]" />
@@ -1377,7 +1402,7 @@ const CreateProductionForm: React.FC<CreateProductionFormProps> = ({ products, o
     };
     
     return (
-        <div className="bg-bg-primary p-4 rounded-lg my-4 border border-[var(--color-border)] animate-fadeIn">
+        <div className="glass-panel p-4 rounded-lg my-4 animate-fadeIn">
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                     <h4 className="text-lg font-semibold text-[var(--color-primary)] mb-2">1. Materia Prima</h4>
@@ -1470,7 +1495,7 @@ export const ProductionsView: React.FC<CommonViewProps & {
                 />
             )}
             
-            <div className="bg-bg-secondary p-4 rounded-lg">
+            <div className="glass-panel p-4 rounded-2xl">
                 <h3 className="text-xl font-bold mb-4">Historial de Producciones</h3>
                  <div className="space-y-4">
                     {sortedProductions.length > 0 ? sortedProductions.map(prod => (
@@ -1512,7 +1537,7 @@ const DayDetailModal: React.FC<DayDetailModalProps> = ({ isOpen, onClose, moveme
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4 animate-fadeIn">
-            <div className="bg-bg-secondary rounded-lg p-6 w-full max-w-2xl animate-scaleIn">
+            <div className="glass-panel rounded-lg p-6 w-full max-w-2xl animate-scaleIn">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold text-[var(--color-primary)]">
                         Movimientos del {date?.toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -1607,7 +1632,7 @@ export const CalendarView: React.FC<{ products: Product[], onMovementClick: (m: 
                 date={selectedDate}
                 onMovementClick={onMovementClick}
             />
-            <div className="bg-bg-secondary p-6 rounded-lg">
+            <div className="glass-panel p-6 rounded-2xl">
                 <div className="flex justify-between items-center mb-4">
                     <button onClick={() => changeWeek(-1)} className="p-2 rounded-full hover:bg-bg-tertiary"><ChevronLeft /></button>
                     <h3 className="text-xl font-bold text-[var(--color-primary)]">
@@ -1738,7 +1763,7 @@ export const StatsView: React.FC<CommonViewProps> = ({ products, showNotificatio
             />
             <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div className="bg-bg-secondary p-6 rounded-lg lg:col-span-1">
+                    <div className="glass-panel p-6 rounded-2xl lg:col-span-1">
                         <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Movimientos del Día</h3>
                         <div className="flex justify-around text-center">
                             <div>
@@ -1755,7 +1780,7 @@ export const StatsView: React.FC<CommonViewProps> = ({ products, showNotificatio
                             </div>
                         </div>
                     </div>
-                    <div className="bg-bg-secondary p-6 rounded-lg lg:col-span-2">
+                    <div className="glass-panel p-6 rounded-2xl lg:col-span-2">
                         <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Estado General del Stock</h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
@@ -1779,7 +1804,7 @@ export const StatsView: React.FC<CommonViewProps> = ({ products, showNotificatio
                     </div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-bg-secondary p-6 rounded-lg">
+                    <div className="glass-panel p-6 rounded-2xl">
                         <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Predicción de Agotamiento</h3>
                         {consumptionForecast.length > 0 ? (
                             <ul className="space-y-4">
@@ -1800,7 +1825,7 @@ export const StatsView: React.FC<CommonViewProps> = ({ products, showNotificatio
                             <p className="text-text-secondary text-center py-8">No hay suficientes datos de consumo para hacer una predicción.</p>
                         )}
                     </div>
-                    <div className="bg-bg-secondary p-6 rounded-lg">
+                    <div className="glass-panel p-6 rounded-2xl">
                         <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)]">Top 5 Productos con más movimiento</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={topMovedProducts} layout="vertical" margin={{ top: 5, right: 20, left: 40, bottom: 5 }}>
@@ -1814,7 +1839,7 @@ export const StatsView: React.FC<CommonViewProps> = ({ products, showNotificatio
                         </ResponsiveContainer>
                     </div>
                 </div>
-                 <div className="bg-bg-secondary p-6 rounded-lg">
+                 <div className="glass-panel p-6 rounded-2xl">
                     <h3 className="text-xl font-bold mb-4 text-[var(--color-primary)] flex items-center gap-2"><Wand2 /> Recomendación de Compra con IA</h3>
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
                         <label htmlFor="days" className="text-text-secondary">Comprar para los próximos</label>
@@ -1927,7 +1952,7 @@ export const ReportsView: React.FC<{ products: Product[] }> = ({ products }) => 
                 </button>
             </Header>
             <div id="report-content">
-                <div className="bg-bg-secondary p-6 rounded-lg">
+                <div className="glass-panel p-6 rounded-2xl">
                     <div className="flex justify-between items-center mb-4 print-hidden">
                         <button onClick={() => changeWeek(-1)} className="p-2 rounded-full hover:bg-bg-tertiary"><ChevronLeft /></button>
                         <h3 className="text-lg font-bold text-text-primary text-center">
@@ -1980,7 +2005,7 @@ export const ReportsView: React.FC<{ products: Product[] }> = ({ products }) => 
                     )}
                 </div>
 
-                <div className="bg-bg-secondary p-6 rounded-lg mt-8">
+                <div className="glass-panel p-6 rounded-2xl mt-8">
                     <h3 className="text-2xl font-bold text-[var(--color-primary)] mb-4">Reportes de Inventario Actual</h3>
                     <div className="flex flex-wrap gap-4 mb-6 print-hidden">
                         <button onClick={() => generateInventoryReport()} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Inventario Total</button>
@@ -2136,7 +2161,7 @@ export const ChatbotView: React.FC<CommonViewProps & {
     return (
         <div>
             <Header title="Asistente Virtual IA" subtitle="Consulta o da órdenes directas para gestionar tu inventario."/>
-            <div className="bg-bg-secondary rounded-lg h-[75vh] flex flex-col">
+            <div className="glass-panel rounded-2xl h-[75vh] flex flex-col">
                 <div className="flex-1 p-4 overflow-y-auto space-y-4">
                     {messages.map((msg, index) => (
                         <div key={msg.id || index} className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end animate-slideInFromRight' : 'justify-start animate-slideInFromLeft'}`}>
@@ -2158,7 +2183,7 @@ export const ChatbotView: React.FC<CommonViewProps & {
                     {loading && <div className="flex justify-start"><div className="p-3 rounded-lg bg-bg-primary animate-pulse">...</div></div>}
                     <div ref={messagesEndRef} />
                 </div>
-                <div className="p-4 border-t border-[var(--color-border)]">
+                <div className="p-4 border-t border-[var(--color-border-glass)]">
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -2219,7 +2244,7 @@ export const SettingsView: React.FC<{
         <div>
             <Header title="Ajustes y Permisos" subtitle="Gestiona la apariencia y el rol de usuario para esta sesión." />
             <div className="space-y-8">
-                <div className="bg-bg-secondary p-6 rounded-lg">
+                <div className="glass-panel p-6 rounded-2xl">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] mb-4 flex items-center gap-2"><Palette/> Apariencia Visual</h3>
                     <p className="text-text-secondary mb-4">Elige entre un tema claro u oscuro. El color de acento amarillo de la marca se mantendrá siempre.</p>
                      <div className="flex items-center gap-4">
@@ -2232,7 +2257,7 @@ export const SettingsView: React.FC<{
                     </div>
                 </div>
                 
-                <div className="bg-bg-secondary p-6 rounded-lg">
+                <div className="glass-panel p-6 rounded-2xl">
                     <h3 className="text-xl font-bold text-[var(--color-primary)] mb-2 flex items-center gap-2"><UserCheck /> Gestión de Roles (Simulado)</h3>
                     <p className="text-text-secondary mb-4">
                         Cambia el rol para ver cómo se ajustan los permisos en la aplicación. Solo el "Jefe" puede ver y usar esta sección.
@@ -2268,7 +2293,7 @@ export const SettingsView: React.FC<{
                     </div>
                 </div>
                 
-                <div className="bg-bg-secondary p-6 rounded-lg">
+                <div className="glass-panel p-6 rounded-2xl">
                     <h3 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2"><Ban/> Zona de Administración (Simulada)</h3>
                     <p className="text-text-secondary mb-4">
                         En una aplicación real, aquí el "Jefe" podría gestionar usuarios, cambiar sus roles permanentemente o restringir su acceso.
